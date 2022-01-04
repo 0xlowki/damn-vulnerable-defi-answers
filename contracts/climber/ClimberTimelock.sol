@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title ClimberTimelock
  * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
@@ -98,7 +100,6 @@ contract ClimberTimelock is AccessControl {
         require(targets.length > 0, "Must provide at least one target");
         require(targets.length == values.length);
         require(targets.length == dataElements.length);
-
         bytes32 id = getOperationId(targets, values, dataElements, salt);
 
         for (uint8 i = 0; i < targets.length; i++) {

